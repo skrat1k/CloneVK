@@ -1,0 +1,11 @@
+env: "local"
+database:
+  Host: "localhost"
+  Port: 5432
+  Username: "postgres"
+  Password: "admin"
+  SSLmode: "disable"
+  DBname: "CloneVK"
+server:
+  adress: "localhost"
+  port: ":8082"
