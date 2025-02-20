@@ -1,9 +1,10 @@
 package main
 
 import (
+	"CloneVK/internal/models"
+	"CloneVK/internal/repositories"
 	"CloneVK/internal/storage"
 	"context"
-	"fmt"
 	"log"
 )
 
@@ -29,11 +30,9 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
-	var test string
-	err = conn.QueryRow(context.Background(), "SELECT testvalue FROM Test WHERE testid=4").Scan(&test)
+	ur := repositories.UserRepository{DB: conn}
+	err = ur.CreateUser(&models.User{Username: "g", PasswordHash: "222", Email: "g@e.com", AvatarURL: "555"})
 	if err != nil {
-		fmt.Println("Ehe pizda", err)
+		log.Fatal(err)
 	}
-
-	fmt.Println(test)
 }
