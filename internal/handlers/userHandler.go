@@ -4,6 +4,8 @@ import (
 	"CloneVK/internal/models"
 	"CloneVK/internal/services"
 	"log"
+	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,4 +19,16 @@ func (uh *UserHandler) CreateUser(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (uh *UserHandler) FindUserByID(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	user, err := uh.UserService.FindUserByID(id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.JSON(http.StatusOK, user)
 }

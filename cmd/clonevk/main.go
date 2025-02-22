@@ -46,6 +46,7 @@ func main() {
 	// }
 
 	router.POST("/user", uh.CreateUser)
+	router.GET("/user/:id", uh.FindUserByID)
 
 	err = router.Run("localhost:8081")
 	if err != nil {

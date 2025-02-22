@@ -19,3 +19,13 @@ func (ur *UserRepository) CreateUser(user *models.User) error {
 	}
 	return nil
 }
+
+func (ur *UserRepository) FindUserByID(id int) (*models.User, error) {
+	user := models.User{ID: id}
+	query := "SELECT username, email, password_hash, avatar_url FROM users WHERE userid=$1"
+	err := ur.DB.QueryRow(context.Background(), query, id).Scan(&user.Username, &user.Email, &user.PasswordHash, &user.AvatarURL)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
