@@ -29,3 +29,5 @@ func (ur *UserRepository) FindUserByID(id int) (*models.User, error) {
 	}
 	return &user, nil
 }
+
+func (ur *UserRepository) FindAllUsers() (*[]models.User, error)

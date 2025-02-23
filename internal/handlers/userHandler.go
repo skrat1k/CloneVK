@@ -15,10 +15,13 @@ type UserHandler struct {
 }
 
 func (uh *UserHandler) CreateUser(c *gin.Context) {
-	err := uh.UserService.CreateUser(&models.User{Username: "ttt", PasswordHash: "222", Email: "ttt@e.com", AvatarURL: "555"})
+	user := models.User{}
+	c.ShouldBindJSON(&user)
+	err := uh.UserService.CreateUser(&user)
 	if err != nil {
 		log.Fatal(err)
 	}
+	c.JSON(http.StatusOK, user.ID)
 }
 
 func (uh *UserHandler) FindUserByID(c *gin.Context) {
