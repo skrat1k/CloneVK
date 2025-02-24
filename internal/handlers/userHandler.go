@@ -35,3 +35,12 @@ func (uh *UserHandler) FindUserByID(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, user)
 }
+
+func (uh *UserHandler) FindAllUsers(c *gin.Context) {
+	users, err := uh.UserService.FindAllUsers()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.JSON(http.StatusOK, users)
+}

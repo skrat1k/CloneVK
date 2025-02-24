@@ -40,13 +40,10 @@ func main() {
 	us := &services.UserService{UserRepository: ur}
 
 	uh := handlers.UserHandler{UserService: us}
-	// err = us.CreateUser(&models.User{Username: "g", PasswordHash: "222", Email: "g@e.com", AvatarURL: "555"})
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
 	router.POST("/user", uh.CreateUser)
 	router.GET("/user/:id", uh.FindUserByID)
+	router.GET("/users", uh.FindAllUsers)
 
 	err = router.Run("localhost:8081")
 	if err != nil {

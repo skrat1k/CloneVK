@@ -16,3 +16,7 @@ func (us *UserService) CreateUser(user *models.User) error {
 func (us *UserService) FindUserByID(id int) (*models.User, error) {
 	return us.UserRepository.FindUserByID(id)
 }
+
+func (us *UserService) FindAllUsers() (*[]models.User, error) {
+	return us.UserRepository.FindAllUsers()
+}
