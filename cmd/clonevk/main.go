@@ -13,6 +13,13 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// TODO: add logger, add error handler, add config and env variables
+// TODO: Реализовать всю структуру для постов и лайков
+// TODO: Сделать ленту
+// TODO: Добавить реддис
+// TODO: Сделать чат
+// TODO: Добавить таймаута, а значит и прокидывать контекты во все репозитории
+// TODO: Написать тесты
 // Потом сделать подгрузку из файла окружения
 const (
 	UsernameDB = "postgres"
