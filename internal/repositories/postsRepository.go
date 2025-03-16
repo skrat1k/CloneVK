@@ -30,6 +30,7 @@ func (pr *PostRepository) CreatePost(post *models.Post) error {
 	return nil
 }
 
+/*
 func (pr *PostRepository) FindAllPostByUser(id int) (*[]models.Post, error) {
 	query := "SELECT postid, post_content, image_url FROM posts WHERE userid = &1"
 	rows, err := pr.DB.Query(context.Background(), query, id)
@@ -46,3 +47,4 @@ func (pr *PostRepository) FindAllPostByUser(id int) (*[]models.Post, error) {
 		posts := append(*posts)
 	}
 }
+*/

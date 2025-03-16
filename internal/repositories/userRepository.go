@@ -7,11 +7,15 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type UserRepository struct {
+type userRepository struct {
 	DB *pgx.Conn
 }
 
-func (ur *UserRepository) CreateUser(user *models.User) error {
+func NewUserRepositories(database *pgx.Conn) IUserRepositories {
+	return &userRepository{database}
+}
+
+func (ur *userRepository) CreateUser(user *models.User) error {
 	query := "INSERT INTO users (username, email, password_hash, avatar_url) VALUES($1,$2,$3,$4) returning userId"
 	err := ur.DB.QueryRow(context.Background(), query, user.Username, user.Email, user.PasswordHash, user.AvatarURL).Scan(&user.ID)
 	if err != nil {
@@ -20,7 +24,7 @@ func (ur *UserRepository) CreateUser(user *models.User) error {
 	return nil
 }
 
-func (ur *UserRepository) FindUserByID(id int) (*models.User, error) {
+func (ur *userRepository) FindUserByID(id int) (*models.User, error) {
 	user := models.User{ID: id}
 	query := "SELECT username, email, password_hash, avatar_url FROM users WHERE userid=$1"
 	err := ur.DB.QueryRow(context.Background(), query, id).Scan(&user.Username, &user.Email, &user.PasswordHash, &user.AvatarURL)
@@ -30,7 +34,7 @@ func (ur *UserRepository) FindUserByID(id int) (*models.User, error) {
 	return &user, nil
 }
 
-func (ur *UserRepository) FindAllUsers() (*[]models.User, error) {
+func (ur *userRepository) FindAllUsers() (*[]models.User, error) {
 	query := "SELECT userid, username, email, password_hash, avatar_url FROM users"
 	rows, err := ur.DB.Query(context.Background(), query)
 	if err != nil {

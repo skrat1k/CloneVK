@@ -7,8 +7,10 @@ import (
 	"CloneVK/internal/storage"
 	"context"
 	"log"
+	"net/http"
+	"os"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 )
 
 // Потом сделать подгрузку из файла окружения
@@ -21,6 +23,8 @@ const (
 )
 
 func main() {
+	infoLog := log.New(os.Stdout, "INFO", 0)
+
 	conn, err := storage.CreatePostgresConnection(storage.ConnectionInfo{
 		Username: UsernameDB,
 		Password: PasswordDB,
@@ -29,23 +33,27 @@ func main() {
 		DBName:   NameDB,
 	})
 
-	router := gin.Default()
-
 	if err != nil {
 		log.Fatal("Connection error", err)
 	}
+
 	defer conn.Close(context.Background())
-	ur := &repositories.UserRepository{DB: conn}
 
-	us := &services.UserService{UserRepository: ur}
+	infoLog.Printf("Success connect to database: %s", NameDB)
 
-	uh := handlers.UserHandler{UserService: us}
+	router := chi.NewRouter()
 
-	router.POST("/user", uh.CreateUser)
-	router.GET("/user/:id", uh.FindUserByID)
-	router.GET("/users", uh.FindAllUsers)
+	ur := repositories.NewUserRepositories(conn)
 
-	err = router.Run("localhost:8081")
+	us := services.NewUserService(ur)
+
+	uh := handlers.NewUserHandler(us)
+
+	uh.Register(router)
+
+	infoLog.Printf("Server succesfully started at port: %s", "8082")
+
+	err = http.ListenAndServe(":8082", router)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -5,18 +5,22 @@ import (
 	"CloneVK/internal/repositories"
 )
 
-type UserService struct {
-	UserRepository *repositories.UserRepository
+type userService struct {
+	UserRepository repositories.IUserRepositories
 }
 
-func (us *UserService) CreateUser(user *models.User) error {
+func NewUserService(userRepository repositories.IUserRepositories) IUserService {
+	return &userService{userRepository}
+}
+
+func (us *userService) CreateUser(user *models.User) error {
 	return us.UserRepository.CreateUser(user)
 }
 
-func (us *UserService) FindUserByID(id int) (*models.User, error) {
+func (us *userService) FindUserByID(id int) (*models.User, error) {
 	return us.UserRepository.FindUserByID(id)
 }
 
-func (us *UserService) FindAllUsers() (*[]models.User, error) {
+func (us *userService) FindAllUsers() (*[]models.User, error) {
 	return us.UserRepository.FindAllUsers()
 }
