@@ -50,11 +50,13 @@ func main() {
 
 	router := chi.NewRouter()
 
+	jwtService := services.NewJWTService()
+
 	ur := repositories.NewUserRepositories(conn)
 
 	us := services.NewUserService(ur)
 
-	uh := handlers.NewUserHandler(us)
+	uh := handlers.NewUserHandler(us, jwtService)
 
 	uh.Register(router)
 

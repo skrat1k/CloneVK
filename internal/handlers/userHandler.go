@@ -20,10 +20,11 @@ const (
 
 type userHandler struct {
 	UserService services.IUserService
+	JWTService  services.JWTService
 }
 
-func NewUserHandler(userService services.IUserService) IHandler {
-	return &userHandler{userService}
+func NewUserHandler(userService services.IUserService, jwtService services.JWTService) IHandler {
+	return &userHandler{userService, jwtService}
 }
 
 func (uh *userHandler) Register(router *chi.Mux) {
@@ -105,5 +106,11 @@ func (uh *userHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	token, err := uh.JWTService.GenerateToken(user.ID)
+	if err != nil {
+		http.Error(w, "Token generation failed", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
