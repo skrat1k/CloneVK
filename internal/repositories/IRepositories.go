@@ -8,4 +8,6 @@ type IUserRepositories interface {
 	FindUserByID(id int) (*models.User, error)
 
 	FindAllUsers() (*[]models.User, error)
+
+	FindUserByEmail(email string) (*models.User, error)
 }

@@ -8,4 +8,8 @@ type IUserService interface {
 	FindUserByID(id int) (*models.User, error)
 
 	FindAllUsers() (*[]models.User, error)
+
+	Register(email, password string) error
+
+	Login(email, password string) (*models.User, error)
 }

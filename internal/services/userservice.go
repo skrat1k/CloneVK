@@ -3,6 +3,9 @@ package services
 import (
 	"CloneVK/internal/models"
 	"CloneVK/internal/repositories"
+	"fmt"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
@@ -23,4 +26,29 @@ func (us *userService) FindUserByID(id int) (*models.User, error) {
 
 func (us *userService) FindAllUsers() (*[]models.User, error) {
 	return us.UserRepository.FindAllUsers()
+}
+
+// Рега и логин через почту и пароль, не судите строго
+
+func (us *userService) Register(email, password string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user := &models.User{Email: email, PasswordHash: string(hash)}
+	return us.CreateUser(user)
+}
+
+func (us *userService) Login(email, password string) (*models.User, error) {
+	user, err := us.UserRepository.FindUserByEmail(email)
+	if err != nil {
+		return nil, fmt.Errorf("email not found")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		return nil, fmt.Errorf("invalid credentials")
+	}
+
+	return user, nil
 }

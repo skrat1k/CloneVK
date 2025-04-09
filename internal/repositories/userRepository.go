@@ -59,3 +59,19 @@ func (ur *userRepository) FindAllUsers() (*[]models.User, error) {
 
 	return &users, nil
 }
+
+func (ur *userRepository) FindUserByEmail(email string) (*models.User, error) {
+	user := &models.User{}
+	query := "SELECT userid, username, email, password_hash, avatar_url FROM users WHERE email=$1"
+	err := ur.DB.QueryRow(context.Background(), query, email).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.PasswordHash,
+		&user.AvatarURL,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
