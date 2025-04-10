@@ -9,7 +9,7 @@ type IUserService interface {
 
 	FindAllUsers() (*[]models.User, error)
 
-	Register(email, password string) error
+	Register(username, email, password string) error
 
 	Login(email, password string) (*models.User, error)
 }

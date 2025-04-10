@@ -73,6 +73,7 @@ func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
 
 func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req struct {
+		Username string `json:"username"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
@@ -81,7 +82,7 @@ func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := uh.UserService.Register(req.Email, req.Password)
+	err := uh.UserService.Register(req.Username, req.Email, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

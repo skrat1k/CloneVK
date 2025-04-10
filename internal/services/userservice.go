@@ -30,12 +30,12 @@ func (us *userService) FindAllUsers() (*[]models.User, error) {
 
 // Рега и логин через почту и пароль, не судите строго
 
-func (us *userService) Register(email, password string) error {
+func (us *userService) Register(username, email, password string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	user := &models.User{Email: email, PasswordHash: string(hash)}
+	user := &models.User{Username: username, Email: email, PasswordHash: string(hash)}
 	return us.CreateUser(user)
 }
 
