@@ -1,0 +1,116 @@
+basePath: /
+definitions:
+  dto.LoginDTO:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  dto.RegisterDTO:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.User:
+    properties:
+      userAvatar:
+        type: string
+      userEmail:
+        type: string
+      userID:
+        type: integer
+      userName:
+        type: string
+      userPassword:
+        type: string
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  description: Социальная сеть на golang
+  title: CloneVK
+  version: dev
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Логин (потом у этого метода будет другой функционал, но пока так)
+      parameters:
+      - description: Пользователь
+        in: body
+        name: userInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Токен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Логин пользователя
+      tags:
+      - users
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Создать пользователя (потом у этого метода будет другой функционал,
+        но пока так)
+      parameters:
+      - description: Пользователь
+        in: body
+        name: userInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Регистрация пользователя
+      tags:
+      - users
+  /user/{id}:
+    get:
+      description: Получает информацию о пользователе
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Получить пользователя по ID
+      tags:
+      - users
+  /users:
+    get:
+      description: Получает информацию о всех пользователях
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: Получить всех пользователей
+      tags:
+      - users
+swagger: "2.0"

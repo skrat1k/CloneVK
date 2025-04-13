@@ -29,6 +29,11 @@ const (
 	NameDB     = "clonevk"
 )
 
+// @title CloneVK
+// @version dev
+// @description Социальная сеть на golang
+// @host localhost:8082
+// @BasePath /
 func main() {
 	infoLog := log.New(os.Stdout, "INFO", 0)
 

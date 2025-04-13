@@ -7,7 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
+	_ "CloneVK/docs"
+
 	"github.com/go-chi/chi/v5"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -32,6 +35,8 @@ func (uh *userHandler) Register(router *chi.Mux) {
 	router.Get(getUserURL, uh.FindUserByID)
 	router.Get(getAllUserURL, uh.FindAllUsers)
 
+	router.Get("/swagger/*", httpSwagger.WrapHandler)
+
 	router.Post(registerURL, uh.RegisterUser)
 	router.Post(loginURL, uh.LoginUser)
 }
@@ -46,6 +51,13 @@ func (uh *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// c.JSON(http.StatusOK, user.ID)
 }
 
+// @Summary Получить пользователя по ID
+// @Description Получает информацию о пользователе
+// @Tags users
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} models.User
+// @Router /user/{id} [get]
 func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -61,16 +73,29 @@ func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Получить всех пользователей
+// @Description Получает информацию о всех пользователях
+// @Tags users
+// @Produce json
+// @Success 200 {object} models.User
+// @Router /users [get]
 func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
-	// users, err := uh.UserService.FindAllUsers()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	users, err := uh.UserService.FindAllUsers()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// c.JSON(http.StatusOK, users)
-	w.Write([]byte("All users"))
+	json.NewEncoder(w).Encode(users)
 }
 
+// @Summary Регистрация пользователя
+// @Description Создать пользователя (потом у этого метода будет другой функционал, но пока так)
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param userInfo body dto.RegisterDTO true "Пользователь"}
+// @Success 200
+// @Router /auth/register [post]
 func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Username string `json:"username"`
@@ -91,6 +116,14 @@ func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+// @Summary Логин пользователя
+// @Description Логин (потом у этого метода будет другой функционал, но пока так)
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param userInfo body dto.LoginDTO true "Пользователь"}
+// @Success 200 {object} map[string]string "Токен"
+// @Router /auth/login [post]
 func (uh *userHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email    string `json:"email"`
