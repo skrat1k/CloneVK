@@ -11,6 +11,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 )
 
 // TODO: add logger, add error handler, add config and env variables
@@ -64,7 +65,16 @@ func main() {
 	uh := handlers.NewUserHandler(us, jwtService)
 
 	uh.Register(router)
-
+	// кусок кода сгенеренный гпт, потом надо бы разобраться с ним
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"}, // или "*", если тестируешь локально
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Max value = 600
+	}))
+	//
 	infoLog.Printf("Server succesfully started at port: %s", "8082")
 
 	err = http.ListenAndServe(":8082", router)
