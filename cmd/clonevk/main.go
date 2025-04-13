@@ -1,12 +1,14 @@
 package main
 
 import (
+	"CloneVK/internal/config"
 	"CloneVK/internal/handlers"
 	"CloneVK/internal/repositories"
 	"CloneVK/internal/services"
 	"CloneVK/internal/storage"
+	logger "CloneVK/pkg/Logger"
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -14,21 +16,13 @@ import (
 	"github.com/go-chi/cors"
 )
 
-// TODO: add logger, add error handler, add config and env variables
+// TODO: add error handler
 // TODO: Реализовать всю структуру для постов и лайков
 // TODO: Сделать ленту
 // TODO: Добавить реддис
 // TODO: Сделать чат
 // TODO: Добавить таймаута, а значит и прокидывать контекты во все репозитории
 // TODO: Написать тесты
-// Потом сделать подгрузку из файла окружения
-const (
-	UsernameDB = "postgres"
-	PasswordDB = "admin"
-	HostDB     = "localhost"
-	PortDB     = "5432"
-	NameDB     = "clonevk"
-)
 
 // @title CloneVK
 // @version dev
@@ -36,36 +30,33 @@ const (
 // @host localhost:8082
 // @BasePath /
 func main() {
-	infoLog := log.New(os.Stdout, "INFO", 0)
+
+	cfg, err := config.MustLoad()
+	if err != nil {
+		panic(err)
+	}
+
+	log := logger.GetLogger(cfg.Env)
 
 	conn, err := storage.CreatePostgresConnection(storage.ConnectionInfo{
-		Username: UsernameDB,
-		Password: PasswordDB,
-		Host:     HostDB,
-		Port:     PortDB,
-		DBName:   NameDB,
+		Username: cfg.UsernameDB,
+		Password: cfg.PasswordDB,
+		Host:     cfg.HostDB,
+		Port:     cfg.PortDB,
+		DBName:   cfg.NameDB,
 	})
 
 	if err != nil {
-		log.Fatal("Connection error", err)
+		log.Error("Connection error", slog.String("error", err.Error()))
+		os.Exit(1) // Мб тут корректнее прописать панику, а не выход, о пока хз не разобрался, работает и слава богу
 	}
 
 	defer conn.Close(context.Background())
 
-	infoLog.Printf("Success connect to database: %s", NameDB)
+	log.Info("Success connect to database")
 
 	router := chi.NewRouter()
-
-	jwtService := services.NewJWTService()
-
-	ur := repositories.NewUserRepositories(conn)
-
-	us := services.NewUserService(ur)
-
-	uh := handlers.NewUserHandler(us, jwtService)
-
-	uh.Register(router)
-	// кусок кода сгенеренный гпт, потом надо бы разобраться с ним
+	// Вот это никому не трогать, я пока не совсем понимаю как оно работает, но без этих строк не работает фронт
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"}, // или "*", если тестируешь локально
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -74,11 +65,23 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           300, // Max value = 600
 	}))
-	//
-	infoLog.Printf("Server succesfully started at port: %s", "8082")
 
-	err = http.ListenAndServe(":8082", router)
+	jwtService := services.NewJWTService()
+
+	ur := repositories.NewUserRepositories(conn)
+
+	us := services.NewUserService(ur)
+
+	uh := handlers.NewUserHandler(us, jwtService, log)
+
+	uh.Register(router)
+
+	log.Info("Server succesfully started at port")
+
+	serverPort := cfg.ServerPort
+
+	err = http.ListenAndServe(serverPort, router)
 	if err != nil {
-		log.Fatal(err)
+		log.Error("Error", slog.String("error", err.Error()))
 	}
 }

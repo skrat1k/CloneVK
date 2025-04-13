@@ -1,11 +1,11 @@
-env: "local"
+env: "dev"
 database:
-  Host: "localhost"
-  Port: 5432
-  Username: "postgres"
-  Password: "admin"
-  SSLmode: "disable"
-  DBname: "CloneVK"
-server:
-  adress: "localhost"
-  port: ":8082"
+  host: "localhost"
+  port: "5432"
+  username: "postgres"
+  password: "admin"
+  sslmode: "disable"
+  dbname: "clonevk"
+httpserver:
+  host: "localhost"
+  port: ":8083"

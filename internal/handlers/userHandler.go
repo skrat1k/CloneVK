@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"CloneVK/internal/services"
+	"database/sql"
 	"encoding/json"
-	"log"
+	"errors"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -24,10 +27,11 @@ const (
 type userHandler struct {
 	UserService services.IUserService
 	JWTService  services.JWTService
+	Log         *slog.Logger
 }
 
-func NewUserHandler(userService services.IUserService, jwtService services.JWTService) IHandler {
-	return &userHandler{userService, jwtService}
+func NewUserHandler(userService services.IUserService, jwtService services.JWTService, logger *slog.Logger) IHandler {
+	return &userHandler{userService, jwtService, logger}
 }
 
 func (uh *userHandler) Register(router *chi.Mux) {
@@ -62,12 +66,22 @@ func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		log.Fatal(err)
+		uh.Log.Error("Failed convert to int", slog.String("error", err.Error()))
+		http.Error(w, "Invalid id", http.StatusBadRequest)
+		return
 	}
 
 	user, err := uh.UserService.FindUserByID(id)
 	if err != nil {
-		log.Fatal(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "User not found", http.StatusNotFound)
+			uh.Log.Error("User not found", slog.Int("id", id))
+			return
+		}
+
+		uh.Log.Error("Failed to find user by id", slog.Int("id", id), slog.String("error", err.Error()))
+		http.Error(w, fmt.Sprintf("Failed to find user by id: %s", err.Error()), http.StatusInternalServerError)
+		return
 	}
 	json.NewEncoder(w).Encode(user)
 
@@ -82,7 +96,9 @@ func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := uh.UserService.FindAllUsers()
 	if err != nil {
-		log.Fatal(err)
+		uh.Log.Error("Failed to get users", slog.String("error", err.Error()))
+		http.Error(w, fmt.Sprintf("Failed to get users: %s", err.Error()), http.StatusInternalServerError)
+		return
 	}
 
 	json.NewEncoder(w).Encode(users)
