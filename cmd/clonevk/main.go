@@ -6,11 +6,13 @@ import (
 	"CloneVK/internal/repositories"
 	"CloneVK/internal/services"
 	"CloneVK/internal/storage"
+	"CloneVK/internal/storage/migrations"
 	logger "CloneVK/pkg/Logger"
 	"context"
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -38,13 +40,25 @@ func main() {
 
 	log := logger.GetLogger(cfg.Env)
 
-	conn, err := storage.CreatePostgresConnection(storage.ConnectionInfo{
+	psqlConnectionUrl := storage.MakeURL(storage.ConnectionInfo{
 		Username: cfg.UsernameDB,
 		Password: cfg.PasswordDB,
 		Host:     cfg.HostDB,
 		Port:     cfg.PortDB,
 		DBName:   cfg.NameDB,
+		SSLMode:  cfg.SSLModeDB,
 	})
+
+	if err := migrations.RunMigrations(psqlConnectionUrl); err != nil {
+		if strings.Contains(err.Error(), "no change") {
+			log.Debug("No new migrations found, continuing application startup...")
+		} else {
+			log.Error("Migration error", slog.String("error", err.Error()))
+			panic(err)
+		}
+	}
+
+	conn, err := storage.CreatePostgresConnection(psqlConnectionUrl)
 
 	if err != nil {
 		log.Error("Connection error", slog.String("error", err.Error()))
