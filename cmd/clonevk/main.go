@@ -27,7 +27,7 @@ import (
 // @title CloneVK
 // @version dev
 // @description Социальная сеть на golang
-// @host localhost:8082
+// @host localhost:8083
 // @BasePath /
 func main() {
 
