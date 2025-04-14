@@ -26,3 +26,19 @@ func GetLogger(env string) *slog.Logger {
 
 	return log
 }
+
+func WithHandler(base *slog.Logger, name string) *slog.Logger {
+	return base.With(slog.String("handler", name))
+}
+
+func WithService(base *slog.Logger, name string) *slog.Logger {
+	return base.With(slog.String("service", name))
+}
+
+func WithRepo(base *slog.Logger, name string) *slog.Logger {
+	return base.With(slog.String("repo", name))
+}
+
+func WithMethod(base *slog.Logger, name string) *slog.Logger {
+	return base.With(slog.String("method", name))
+}

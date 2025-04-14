@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"CloneVK/internal/services"
+	logger "CloneVK/pkg/Logger"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -30,19 +31,26 @@ type userHandler struct {
 	Log         *slog.Logger
 }
 
-func NewUserHandler(userService services.IUserService, jwtService services.JWTService, logger *slog.Logger) IHandler {
-	return &userHandler{userService, jwtService, logger}
+func NewUserHandler(userService services.IUserService, jwtService services.JWTService, log *slog.Logger) IHandler {
+	lg := logger.WithHandler(log, "UserHandler")
+	return &userHandler{userService, jwtService, lg}
 }
 
 func (uh *userHandler) Register(router *chi.Mux) {
 	router.Post(createUserURL, uh.CreateUser)
+	uh.Log.Info("Successfully created http route", slog.String("route", createUserURL))
 	router.Get(getUserURL, uh.FindUserByID)
+	uh.Log.Info("Successfully created http route", slog.String("route", getUserURL))
 	router.Get(getAllUserURL, uh.FindAllUsers)
+	uh.Log.Info("Successfully created http route", slog.String("route", getAllUserURL))
 
 	router.Get("/swagger/*", httpSwagger.WrapHandler)
+	uh.Log.Info("Swagger init")
 
 	router.Post(registerURL, uh.RegisterUser)
+	uh.Log.Info("Successfully created http route", slog.String("route", registerURL))
 	router.Post(loginURL, uh.LoginUser)
+	uh.Log.Info("Successfully created http route", slog.String("route", loginURL))
 }
 
 func (uh *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -63,23 +71,25 @@ func (uh *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} models.User
 // @Router /user/{id} [get]
 func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithMethod(uh.Log, "FindUserByID")
 
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		uh.Log.Error("Failed convert to int", slog.String("error", err.Error()))
+		log.Error("Failed convert to int", slog.String("error", err.Error()))
 		http.Error(w, "Invalid id", http.StatusBadRequest)
 		return
 	}
+	log.Debug("Getting id", slog.Int("userId", id))
 
 	user, err := uh.UserService.FindUserByID(id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.Error(w, "User not found", http.StatusNotFound)
-			uh.Log.Error("User not found", slog.Int("id", id))
+			log.Error("User not found", slog.Int("userId", id))
 			return
 		}
 
-		uh.Log.Error("Failed to find user by id", slog.Int("id", id), slog.String("error", err.Error()))
+		log.Error("Failed to find user by id", slog.Int("id", id), slog.String("error", err.Error()))
 		http.Error(w, fmt.Sprintf("Failed to find user by id: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
@@ -94,9 +104,10 @@ func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} models.User
 // @Router /users [get]
 func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithMethod(uh.Log, "FindAllUsers")
 	users, err := uh.UserService.FindAllUsers()
 	if err != nil {
-		uh.Log.Error("Failed to get users", slog.String("error", err.Error()))
+		log.Error("Failed to get users", slog.String("error", err.Error()))
 		http.Error(w, fmt.Sprintf("Failed to get users: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
