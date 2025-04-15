@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	createUserURL = "/user"
-	getUserURL    = "/user/{id}"
+	//createUserURL = "/user"
+	getUserURL    = "/users/{id}"
 	getAllUserURL = "/users"
 	registerURL   = "/auth/register"
 	loginURL      = "/auth/login"
@@ -37,8 +37,8 @@ func NewUserHandler(userService services.IUserService, jwtService services.JWTSe
 }
 
 func (uh *userHandler) Register(router *chi.Mux) {
-	router.Post(createUserURL, uh.CreateUser)
-	uh.Log.Info("Successfully created http route", slog.String("route", createUserURL))
+	//router.Post(createUserURL, uh.CreateUser)
+	//uh.Log.Info("Successfully created http route", slog.String("route", createUserURL))
 	router.Get(getUserURL, uh.FindUserByID)
 	uh.Log.Info("Successfully created http route", slog.String("route", getUserURL))
 	router.Get(getAllUserURL, uh.FindAllUsers)
@@ -53,15 +53,15 @@ func (uh *userHandler) Register(router *chi.Mux) {
 	uh.Log.Info("Successfully created http route", slog.String("route", loginURL))
 }
 
-func (uh *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	// user := models.User{}
-	// c.ShouldBindJSON(&user)
-	// err := uh.UserService.CreateUser(&user)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// c.JSON(http.StatusOK, user.ID)
-}
+// func (uh *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+// 	user := models.User{}
+// 	c.ShouldBindJSON(&user)
+// 	err := uh.UserService.CreateUser(&user)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	c.JSON(http.StatusOK, user.ID)
+// }
 
 // @Summary Получить пользователя по ID
 // @Description Получает информацию о пользователе
