@@ -83,12 +83,14 @@ func main() {
 	jwtService := services.NewJWTService()
 
 	ur := repositories.NewUserRepositories(conn)
-
 	us := services.NewUserService(ur)
-
 	uh := handlers.NewUserHandler(us, jwtService, log)
-
 	uh.Register(router)
+
+	pr := repositories.NewPostRepository(conn)
+	ps := services.NewPostService(pr)
+	ph := handlers.NewPostHandler(ps, log)
+	ph.Register(router)
 
 	log.Info("Server succesfully started at port")
 

@@ -11,3 +11,11 @@ type IUserRepositories interface {
 
 	FindUserByEmail(email string) (*models.User, error)
 }
+
+type IPostRepositories interface {
+	FindPostByID(id int) (*models.Post, error)
+
+	GetAllPostsByUser(userId int) (*[]models.Post, error)
+
+	CreatePost(post *models.Post) error
+}
