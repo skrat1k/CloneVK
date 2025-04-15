@@ -5,7 +5,7 @@ database:
   username: "postgres"
   password: "admin"
   sslmode: "disable"
-  dbname: "clonevk1"
+  dbname: "clonevk"
 httpserver:
   host: "localhost"
   port: ":8083"
