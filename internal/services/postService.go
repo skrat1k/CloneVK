@@ -30,6 +30,6 @@ func (ps *postService) FindPostByID(id int) (*models.Post, error) {
 	return ps.PostRepository.FindPostByID(id)
 }
 
-func (ps *postService) GetAllPostsByUser(userId int) (*[]models.Post, error) {
+func (ps *postService) GetAllPostsByUser(userId int) ([]models.Post, error) {
 	return ps.PostRepository.GetAllPostsByUser(userId)
 }

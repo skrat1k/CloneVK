@@ -17,15 +17,15 @@ func NewPostRepository(database *pgx.Conn) IPostRepositories {
 
 func (pr *postRepository) FindPostByID(id int) (*models.Post, error) {
 	post := &models.Post{}
-	query := "SELECT postid, userid, post_content, image_url FROM posts"
-	err := pr.DB.QueryRow(context.Background(), query).Scan(&post.ID, &post.UserID, &post.Content, &post.ImgURL)
+	query := "SELECT postid, userid, post_content, image_url FROM posts WHERE postid = $1"
+	err := pr.DB.QueryRow(context.Background(), query, id).Scan(&post.ID, &post.UserID, &post.Content, &post.ImgURL)
 	if err != nil {
 		return nil, err
 	}
 	return post, nil
 }
 
-func (pr *postRepository) GetAllPostsByUser(userId int) (*[]models.Post, error) {
+func (pr *postRepository) GetAllPostsByUser(userId int) ([]models.Post, error) {
 	query := "SELECT postid, post_content, image_url FROM posts WHERE userid = $1"
 	rows, err := pr.DB.Query(context.Background(), query, userId)
 	if err != nil {
@@ -48,7 +48,7 @@ func (pr *postRepository) GetAllPostsByUser(userId int) (*[]models.Post, error) 
 		return nil, err
 	}
 
-	return &posts, nil
+	return posts, nil
 }
 
 func (pr *postRepository) CreatePost(post *models.Post) error {
