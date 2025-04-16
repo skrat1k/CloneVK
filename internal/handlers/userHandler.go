@@ -124,22 +124,29 @@ func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
 // @Success 200
 // @Router /auth/register [post]
 func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithMethod(uh.Log, "RegisterUser")
 	var req struct {
 		Username string `json:"username"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Error("Invalid JSON payload", slog.String("error", err.Error()))
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
+	log.Debug("Attempting to register user", slog.String("email", req.Email))
+
 	err := uh.UserService.Register(req.Username, req.Email, req.Password)
 	if err != nil {
+		log.Error("Failed to register user", slog.String("error", err.Error()), slog.String("email", req.Email))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	log.Info("User successfully registered", slog.String("email", req.Email))
 	w.WriteHeader(http.StatusCreated)
 }
 
@@ -152,26 +159,34 @@ func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]string "Токен"
 // @Router /auth/login [post]
 func (uh *userHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithMethod(uh.Log, "LoginUser")
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Error("Invalid JSON payload", slog.String("error", err.Error()))
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
+	log.Debug("Attempting login", slog.String("email", req.Email))
+
 	user, err := uh.UserService.Login(req.Email, req.Password)
 	if err != nil {
+		log.Warn("Unauthorized login attempt", slog.String("email", req.Email))
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	token, err := uh.JWTService.GenerateToken(user.ID)
 	if err != nil {
+		log.Error("Token generation failed", slog.Int("userID", user.ID), slog.String("error", err.Error()))
 		http.Error(w, "Token generation failed", http.StatusInternalServerError)
 		return
 	}
 
+	log.Info("User successfully logged in", slog.Int("userID", user.ID), slog.String("email", user.Email))
 	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
