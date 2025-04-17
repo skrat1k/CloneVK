@@ -39,6 +39,14 @@ func (ph *postHandler) Register(router *chi.Mux) {
 	router.Get(getPostsFromUser, ph.GetAllPostsByUser)
 }
 
+// @Summary Создание поста
+// @Description Создаёт пост и добавялет его в базу данных
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param postInfo body dto.CreatePostDTO true "Пост"
+// @Success 200
+// @Router /posts [post]
 func (ph *postHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	var dto dto.CreatePostDTO
 
@@ -70,6 +78,13 @@ func (ph *postHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @Summary Получить пост по ID
+// @Description Получает пост по идентификатору
+// @Tags posts
+// @Produce json
+// @Param id path int true "Post ID"
+// @Success 200 {object} models.Post
+// @Router /posts/{id} [get]
 func (ph *postHandler) FindPostByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -90,6 +105,13 @@ func (ph *postHandler) FindPostByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(post)
 }
 
+// @Summary Получить все посты от пользователя
+// @Description Получает информацию о всех постах пользователя по его идентификатору
+// @Tags posts
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} models.Post
+// @Router /posts/user/{id} [get]
 func (ph *postHandler) GetAllPostsByUser(w http.ResponseWriter, r *http.Request) {
 	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

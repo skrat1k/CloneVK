@@ -14,7 +14,6 @@ import (
 	_ "CloneVK/docs"
 
 	"github.com/go-chi/chi/v5"
-	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -43,9 +42,6 @@ func (uh *userHandler) Register(router *chi.Mux) {
 	uh.Log.Info("Successfully created http route", slog.String("route", getUserURL))
 	router.Get(getAllUserURL, uh.FindAllUsers)
 	uh.Log.Info("Successfully created http route", slog.String("route", getAllUserURL))
-
-	router.Get("/swagger/*", httpSwagger.WrapHandler)
-	uh.Log.Info("Swagger init")
 
 	router.Post(registerURL, uh.RegisterUser)
 	uh.Log.Info("Successfully created http route", slog.String("route", registerURL))

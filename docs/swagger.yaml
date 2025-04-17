@@ -1,5 +1,17 @@
 basePath: /
 definitions:
+  dto.CreatePostDTO:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      imageURL:
+        type: string
+    required:
+    - content
+    - id
+    type: object
   dto.LoginDTO:
     properties:
       email:
@@ -16,6 +28,17 @@ definitions:
       username:
         type: string
     type: object
+  models.Post:
+    properties:
+      content:
+        type: string
+      imageURL:
+        type: string
+      postID:
+        type: integer
+      userID:
+        type: integer
+    type: object
   models.User:
     properties:
       userAvatar:
@@ -29,7 +52,7 @@ definitions:
       userPassword:
         type: string
     type: object
-host: localhost:8082
+host: localhost:8083
 info:
   contact: {}
   description: Социальная сеть на golang
@@ -81,6 +104,64 @@ paths:
       summary: Регистрация пользователя
       tags:
       - users
+  /posts:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт пост и добавялет его в базу данных
+      parameters:
+      - description: Пост
+        in: body
+        name: postInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePostDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Создание поста
+      tags:
+      - posts
+  /posts/{id}:
+    get:
+      description: Получает пост по идентификатору
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Post'
+      summary: Получить пост по ID
+      tags:
+      - posts
+  /posts/user/{id}:
+    get:
+      description: Получает информацию о всех постах пользователя по его идентификатору
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Post'
+      summary: Получить все посты от пользователя
+      tags:
+      - posts
   /user/{id}:
     get:
       description: Получает информацию о пользователе

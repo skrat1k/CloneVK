@@ -16,6 +16,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // TODO: add error handler
@@ -91,6 +92,9 @@ func main() {
 	ps := services.NewPostService(pr)
 	ph := handlers.NewPostHandler(ps, log)
 	ph.Register(router)
+
+	router.Get("/swagger/*", httpSwagger.WrapHandler)
+	log.Info("Swagger init")
 
 	log.Info("Server succesfully started at port")
 
