@@ -147,7 +147,26 @@ func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("User successfully registered", slog.String("email", req.Email))
+
+	//авто логин после успешной реги
+	user, err := uh.UserService.Login(req.Email, req.Password)
+	if err != nil {
+		log.Error("Auto-login failed after registration", slog.String("error", err.Error()))
+		http.Error(w, "Auto-login failed", http.StatusInternalServerError)
+		return
+	}
+
+	token, err := uh.JWTService.GenerateToken(user.ID)
+	if err != nil {
+		log.Error("Token generation failed", slog.Int("userID", user.ID), slog.String("error", err.Error()))
+		http.Error(w, "Token generation failed", http.StatusInternalServerError)
+		return
+	}
+
+	log.Info("Token successfully generated after registration", slog.String("token", token))
+
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
 }
 
 // @Summary Логин пользователя
