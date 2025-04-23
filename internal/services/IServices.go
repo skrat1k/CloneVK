@@ -1,6 +1,9 @@
 package services
 
-import "CloneVK/internal/models"
+import (
+	"CloneVK/internal/models"
+	"time"
+)
 
 type IUserService interface {
 	CreateUser(user *models.User) error
@@ -12,4 +15,6 @@ type IUserService interface {
 	Register(username, email, password string) error
 
 	Login(email, password string) (*models.User, error)
+
+	SaveRefreshToken(userID int, token string, expiresAt time.Time) error
 }

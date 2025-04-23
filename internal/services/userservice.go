@@ -6,6 +6,7 @@ import (
 	logger "CloneVK/pkg/Logger"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -102,4 +103,18 @@ func (us *userService) Login(email, password string) (*models.User, error) {
 
 	log.Info("User login successful", slog.Int("userID", user.ID))
 	return user, nil
+}
+
+func (us *userService) SaveRefreshToken(userID int, token string, expiresAt time.Time) error {
+	log := logger.WithMethod(us.Log, "SaveRefreshToken")
+	log.Debug("Saving refresh token", slog.Int("userID", userID))
+
+	err := us.UserRepository.SaveRefreshToken(userID, token, expiresAt)
+	if err != nil {
+		log.Error("Failed to save refresh token", slog.String("error", err.Error()))
+		return err
+	}
+
+	log.Info("Refresh token saved", slog.Int("userID", userID))
+	return nil
 }
