@@ -3,6 +3,7 @@ package repositories
 import (
 	"CloneVK/internal/models"
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -74,4 +75,13 @@ func (ur *userRepository) FindUserByEmail(email string) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (ur *userRepository) SaveRefreshToken(userID int, token string, expiresAt time.Time) error {
+	query := `
+		INSERT INTO refresh_tokens (user_id, token, expires_at)
+		VALUES ($1, $2, $3)
+	`
+	_, err := ur.DB.Exec(context.Background(), query, userID, token, expiresAt)
+	return err
 }

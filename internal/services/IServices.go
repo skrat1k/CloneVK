@@ -3,6 +3,7 @@ package services
 import (
 	dto "CloneVK/internal/dto/posts"
 	"CloneVK/internal/models"
+	"time"
 )
 
 type IUserService interface {
@@ -15,6 +16,8 @@ type IUserService interface {
 	Register(username, email, password string) error
 
 	Login(email, password string) (*models.User, error)
+
+	SaveRefreshToken(userID int, token string, expiresAt time.Time) error
 }
 
 type IPostService interface {

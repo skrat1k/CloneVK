@@ -120,23 +120,58 @@ func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
 // @Success 200
 // @Router /auth/register [post]
 func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithMethod(uh.Log, "RegisterUser")
+
 	var req struct {
 		Username string `json:"username"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Error("Invalid JSON payload", slog.String("error", err.Error()))
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
+	log.Debug("Attempting to register user", slog.String("email", req.Email))
+
 	err := uh.UserService.Register(req.Username, req.Email, req.Password)
 	if err != nil {
+		log.Error("Failed to register user", slog.String("error", err.Error()), slog.String("email", req.Email))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	user, err := uh.UserService.Login(req.Email, req.Password)
+	if err != nil {
+		log.Error("Auto-login failed after registration", slog.String("error", err.Error()))
+		http.Error(w, "Auto-login failed", http.StatusInternalServerError)
+		return
+	}
+
+	tokenPair, err := uh.JWTService.GenerateTokens(user.ID)
+	if err != nil {
+		log.Error("Token generation failed", slog.Int("userID", user.ID), slog.String("error", err.Error()))
+		http.Error(w, "Token generation failed", http.StatusInternalServerError)
+		return
+	}
+
+	err = uh.UserService.SaveRefreshToken(user.ID, tokenPair.RefreshToken, tokenPair.RefreshTokenExpiresAt)
+
+	if err != nil {
+		log.Error("Failed to save refresh token", slog.String("error", err.Error()))
+		http.Error(w, "Failed to save refresh token", http.StatusInternalServerError)
+		return
+	}
+
+	log.Info("User registered and logged in", slog.Int("userID", user.ID), slog.String("email", user.Email))
+
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"access_token":  tokenPair.AccessToken,
+		"refresh_token": tokenPair.RefreshToken,
+	})
 }
 
 // @Summary Логин пользователя
@@ -148,26 +183,45 @@ func (uh *userHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} map[string]string "Токен"
 // @Router /auth/login [post]
 func (uh *userHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	log := logger.WithMethod(uh.Log, "LoginUser")
+
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Error("Invalid JSON payload", slog.String("error", err.Error()))
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
+	log.Debug("Attempting login", slog.String("email", req.Email))
+
 	user, err := uh.UserService.Login(req.Email, req.Password)
 	if err != nil {
+		log.Warn("Unauthorized login attempt", slog.String("email", req.Email))
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	token, err := uh.JWTService.GenerateToken(user.ID)
+	tokenPair, err := uh.JWTService.GenerateTokens(user.ID)
 	if err != nil {
+		log.Error("Token generation failed", slog.Int("userID", user.ID), slog.String("error", err.Error()))
 		http.Error(w, "Token generation failed", http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
+	err = uh.UserService.SaveRefreshToken(user.ID, tokenPair.RefreshToken, tokenPair.RefreshTokenExpiresAt)
+	if err != nil {
+		log.Error("Failed to save refresh token", slog.String("error", err.Error()))
+		http.Error(w, "Failed to save refresh token", http.StatusInternalServerError)
+		return
+	}
+
+	log.Info("User successfully logged in", slog.Int("userID", user.ID), slog.String("email", user.Email))
+	json.NewEncoder(w).Encode(map[string]string{
+		"access_token":  tokenPair.AccessToken,
+		"refresh_token": tokenPair.RefreshToken,
+	})
 }

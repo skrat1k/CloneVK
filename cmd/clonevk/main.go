@@ -81,10 +81,12 @@ func main() {
 		MaxAge:           300, // Max value = 600
 	}))
 
-	jwtService := services.NewJWTService()
+	jwtService := services.NewJWTService(log)
 
 	ur := repositories.NewUserRepositories(conn)
-	us := services.NewUserService(ur)
+
+	us := services.NewUserService(ur, log)
+
 	uh := handlers.NewUserHandler(us, jwtService, log)
 	uh.Register(router)
 
