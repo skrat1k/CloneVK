@@ -29,3 +29,7 @@ type IPostService interface {
 
 	DeletePost(id int) error
 }
+
+type IFeedService interface {
+	GetGlobalFeed(limit int, offset int) ([]models.Post, error)
+}

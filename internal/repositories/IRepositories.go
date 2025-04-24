@@ -30,3 +30,7 @@ type IPostRepositories interface {
 
 	DeletePost(id int) error
 }
+
+type IFeedRepositories interface {
+	GetGlobalFeed(limit int, offset int) ([]models.Post, error)
+}
