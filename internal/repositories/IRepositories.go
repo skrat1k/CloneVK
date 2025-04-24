@@ -18,7 +18,7 @@ type IUserRepositories interface {
 
 	//GetRefreshToken(userID int) (string, error)
 
-	//DeleteRefreshToken(userID int) error
+	DeleteRefreshTokensByUserID(userID int) error
 }
 
 type IPostRepositories interface {

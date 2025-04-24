@@ -101,6 +101,11 @@ func (us *userService) Login(email, password string) (*models.User, error) {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
+	err = us.UserRepository.DeleteRefreshTokensByUserID(user.ID)
+	if err != nil {
+		us.Log.Warn("Failed to delete old refresh tokens", slog.String("error", err.Error()))
+	}
+
 	log.Info("User login successful", slog.Int("userID", user.ID))
 	return user, nil
 }

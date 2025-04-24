@@ -85,3 +85,9 @@ func (ur *userRepository) SaveRefreshToken(userID int, token string, expiresAt t
 	_, err := ur.DB.Exec(context.Background(), query, userID, token, expiresAt)
 	return err
 }
+
+func (ur *userRepository) DeleteRefreshTokensByUserID(userID int) error {
+	query := "DELETE FROM refresh_tokens WHERE user_id = $1"
+	_, err := ur.DB.Exec(context.Background(), query, userID)
+	return err
+}
