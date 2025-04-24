@@ -33,3 +33,7 @@ func (ps *postService) FindPostByID(id int) (*models.Post, error) {
 func (ps *postService) GetAllPostsByUser(userId int) ([]models.Post, error) {
 	return ps.PostRepository.GetAllPostsByUser(userId)
 }
+
+func (ps *postService) DeletePost(id int) error {
+	return ps.PostRepository.DeletePost(id)
+}

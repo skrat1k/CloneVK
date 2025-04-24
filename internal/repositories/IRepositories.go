@@ -27,4 +27,6 @@ type IPostRepositories interface {
 	GetAllPostsByUser(userId int) ([]models.Post, error)
 
 	CreatePost(post *models.Post) error
+
+	DeletePost(id int) error
 }

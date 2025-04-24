@@ -21,6 +21,7 @@ const (
 	getAllPostURL    = "/posts"
 	createPostURL    = "/posts"
 	getPostsFromUser = "/posts/user/{id}"
+	deletePost       = "/posts/{id}"
 )
 
 type postHandler struct {
@@ -37,6 +38,7 @@ func (ph *postHandler) Register(router *chi.Mux) {
 	router.Post(createPostURL, ph.CreatePost)
 	router.Get(getPostURL, ph.FindPostByID)
 	router.Get(getPostsFromUser, ph.GetAllPostsByUser)
+	router.Delete(deletePost, ph.DeletePost)
 }
 
 // @Summary Создание поста
@@ -131,4 +133,19 @@ func (ph *postHandler) GetAllPostsByUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	json.NewEncoder(w).Encode(posts)
+}
+
+func (ph *postHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
+	postId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	err = ph.PostService.DeletePost(postId)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to delete post: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -59,3 +59,12 @@ func (pr *postRepository) CreatePost(post *models.Post) error {
 	}
 	return nil
 }
+
+func (pr *postRepository) DeletePost(id int) error {
+	query := "DELETE FROM posts WHERE postid = $1"
+	_, err := pr.DB.Exec(context.Background(), query, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
