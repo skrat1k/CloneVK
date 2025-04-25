@@ -1,7 +1,7 @@
 package services
 
 import (
-	dto "CloneVK/internal/dto/posts"
+	postdto "CloneVK/internal/dto/posts"
 	"CloneVK/internal/models"
 	"CloneVK/internal/repositories"
 )
@@ -14,26 +14,43 @@ func NewPostService(postRepository repositories.IPostRepositories) IPostService 
 	return &postService{postRepository}
 }
 
-func (ps *postService) CreatePost(dto *dto.CreatePostDTO) (int, error) {
+func (s *postService) CreatePost(dto *postdto.CreatePostDTO) (int, error) {
 	post := models.Post{
 		UserID:  dto.ID,
 		Content: dto.Content,
 		ImgURL:  dto.ImageURL,
 	}
 
-	err := ps.PostRepository.CreatePost(&post)
+	err := s.PostRepository.CreatePost(&post)
 
 	return post.ID, err
 }
 
-func (ps *postService) FindPostByID(id int) (*models.Post, error) {
-	return ps.PostRepository.FindPostByID(id)
+func (s *postService) FindPostByID(id int) (*models.Post, error) {
+	return s.PostRepository.FindPostByID(id)
 }
 
-func (ps *postService) GetAllPostsByUser(userId int) ([]models.Post, error) {
-	return ps.PostRepository.GetAllPostsByUser(userId)
+func (s *postService) GetAllPostsByUser(userId int) ([]models.Post, error) {
+	return s.PostRepository.GetAllPostsByUser(userId)
 }
 
-func (ps *postService) DeletePost(id int) error {
-	return ps.PostRepository.DeletePost(id)
+func (s *postService) DeletePost(id int) error {
+	return s.PostRepository.DeletePost(id)
+}
+
+func (s *postService) UpdatePost(newPost *postdto.UpdatePostDTO) error {
+	post, err := s.FindPostByID(newPost.ID)
+	if err != nil {
+		return err
+	}
+
+	if newPost.Content != "" {
+		post.Content = newPost.Content
+	}
+
+	if newPost.ImageURL != "" {
+		post.ImgURL = newPost.ImageURL
+	}
+
+	return s.PostRepository.UpdatePost(post)
 }

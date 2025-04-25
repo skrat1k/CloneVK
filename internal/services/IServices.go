@@ -29,6 +29,8 @@ type IPostService interface {
 	GetAllPostsByUser(userId int) ([]models.Post, error)
 
 	DeletePost(id int) error
+
+	UpdatePost(newPost *postdto.UpdatePostDTO) error
 }
 
 type IFeedService interface {

@@ -29,6 +29,8 @@ type IPostRepositories interface {
 	CreatePost(post *models.Post) error
 
 	DeletePost(id int) error
+
+	UpdatePost(post *models.Post) error
 }
 
 type IFeedRepositories interface {
