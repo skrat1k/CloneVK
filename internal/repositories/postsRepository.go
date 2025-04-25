@@ -25,9 +25,9 @@ func (r *postRepository) FindPostByID(id int) (*models.Post, error) {
 	return post, nil
 }
 
-func (r *postRepository) GetAllPostsByUser(userId int) ([]models.Post, error) {
-	query := "SELECT postid, post_content, image_url FROM posts WHERE userid = $1"
-	rows, err := r.DB.Query(context.Background(), query, userId)
+func (r *postRepository) GetAllPostsByUser(userId int, limit int, offset int) ([]models.Post, error) {
+	query := "SELECT postid, post_content, image_url FROM posts WHERE userid = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
+	rows, err := r.DB.Query(context.Background(), query, userId, limit, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -26,7 +26,7 @@ type IPostService interface {
 
 	FindPostByID(id int) (*models.Post, error)
 
-	GetAllPostsByUser(userId int) ([]models.Post, error)
+	GetAllPostsByUser(userId int, limit int, offset int) ([]models.Post, error)
 
 	DeletePost(id int) error
 

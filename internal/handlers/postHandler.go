@@ -17,12 +17,12 @@ import (
 )
 
 const (
-	getPostURL       = "/posts/{id}"
-	getAllPostURL    = "/posts"
-	createPostURL    = "/posts"
-	getPostsFromUser = "/posts/user/{id}"
-	deletePost       = "/posts/{id}"
-	updatePostURL    = "/posts/update"
+	getPostURL     = "/posts/{id}"
+	getAllPostURL  = "/posts"
+	createPostURL  = "/posts"
+	getPostsByUser = "/posts/user"
+	deletePost     = "/posts/{id}"
+	updatePostURL  = "/posts/update"
 )
 
 type postHandler struct {
@@ -38,7 +38,7 @@ func NewPostHandler(postService services.IPostService, log *slog.Logger) IHandle
 func (h *postHandler) Register(router *chi.Mux) {
 	router.Post(createPostURL, h.CreatePost)
 	router.Get(getPostURL, h.FindPostByID)
-	router.Get(getPostsFromUser, h.GetAllPostsByUser)
+	router.Get(getPostsByUser, h.GetAllPostsByUser)
 	router.Delete(deletePost, h.DeletePost)
 	router.Put(updatePostURL, h.UpdatePost)
 }
@@ -117,13 +117,26 @@ func (h *postHandler) FindPostByID(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} models.Post
 // @Router /posts/user/{id} [get]
 func (h *postHandler) GetAllPostsByUser(w http.ResponseWriter, r *http.Request) {
-	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	queryParams := r.URL.Query()
+	userid, err := strconv.Atoi(queryParams.Get("userid"))
 	if err != nil {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		http.Error(w, "Invalid user id value", http.StatusBadRequest)
 		return
 	}
 
-	posts, err := h.PostService.GetAllPostsByUser(userId)
+	limit, err := strconv.Atoi(queryParams.Get("limit"))
+	if err != nil {
+		http.Error(w, "Invalid limit value", http.StatusBadRequest)
+		return
+	}
+
+	offset, err := strconv.Atoi(queryParams.Get("offset"))
+	if err != nil {
+		http.Error(w, "Invalid offset value", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.PostService.GetAllPostsByUser(userid, limit, offset)
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to find posts by userID: %s", err.Error()), http.StatusInternalServerError)

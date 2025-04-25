@@ -30,8 +30,8 @@ func (s *postService) FindPostByID(id int) (*models.Post, error) {
 	return s.PostRepository.FindPostByID(id)
 }
 
-func (s *postService) GetAllPostsByUser(userId int) ([]models.Post, error) {
-	return s.PostRepository.GetAllPostsByUser(userId)
+func (s *postService) GetAllPostsByUser(userId int, limit int, offset int) ([]models.Post, error) {
+	return s.PostRepository.GetAllPostsByUser(userId, limit, offset)
 }
 
 func (s *postService) DeletePost(id int) error {
