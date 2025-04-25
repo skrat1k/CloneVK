@@ -98,6 +98,11 @@ func main() {
 	feedHandler := handlers.NewFeedHandler(feedService)
 	feedHandler.Register(router)
 
+	followRepo := repositories.NewFollowRepository(conn)
+	followService := services.NewFollowService(followRepo)
+	followHandler := handlers.NewFollowHandler(followService)
+	followHandler.Register(router)
+
 	router.Get("/swagger/*", httpSwagger.WrapHandler)
 	log.Info("Swagger init")
 
