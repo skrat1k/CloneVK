@@ -33,6 +33,7 @@ type IPostService interface {
 
 type IFeedService interface {
 	GetGlobalFeed(limit int, offset int) ([]models.Post, error)
+	GetPersonalFeed(userid int, limit int, offset int) ([]models.Post, error)
 }
 
 type IFollowService interface {

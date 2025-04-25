@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	getGlobalFeed = "/feed/global"
+	getGlobalFeed   = "/feed/global"
+	getPersonalFeed = "/feed/personal"
 )
 
 type feedHandler struct {
@@ -24,6 +25,7 @@ func NewFeedHandler(feedSrvice services.IFeedService) IHandler {
 
 func (h *feedHandler) Register(router *chi.Mux) {
 	router.Get(getGlobalFeed, h.GetGlobalFeed)
+	router.Get(getPersonalFeed, h.GetPersonalFeed)
 }
 
 func (h *feedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +45,37 @@ func (h *feedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
 	posts, err := h.FeedService.GetGlobalFeed(limit, offset)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to get posts: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(posts)
+}
+
+func (h *feedHandler) GetPersonalFeed(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
+	userid, err := strconv.Atoi(queryParams.Get("userid"))
+	if err != nil {
+		http.Error(w, "Invalid user id value", http.StatusBadRequest)
+		return
+	}
+
+	limit, err := strconv.Atoi(queryParams.Get("limit"))
+	if err != nil {
+		http.Error(w, "Invalid limit value", http.StatusBadRequest)
+		return
+	}
+
+	offset, err := strconv.Atoi(queryParams.Get("offset"))
+	if err != nil {
+		http.Error(w, "Invalid offset value", http.StatusBadRequest)
+		return
+	}
+
+	posts, err := h.FeedService.GetPersonalFeed(userid, limit, offset)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to get personal feed for user %d: %s", userid, err.Error()), http.StatusInternalServerError)
 		return
 	}
 
