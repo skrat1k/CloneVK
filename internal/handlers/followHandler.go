@@ -36,6 +36,17 @@ func (h *followHandler) Register(router *chi.Mux) {
 	router.Delete(deleteFollowURL, h.DeleteFollow)
 }
 
+// @Summary Создать фоллов
+// @Description Фолловит человека на другого
+// @Tags follows
+// @Accept json
+// @Produce json
+// @Param followInfo body dto.FollowDTO true "Фоллов"
+// @Success 204
+// @Failure 400 {string} string "Invalid JSON"
+// @Failure 400 {string} string "Validate error"
+// @Failure 500 {string} string "Failed to create follow"
+// @Router /follows [post]
 func (h *followHandler) CreateFollow(w http.ResponseWriter, r *http.Request) {
 	var dto dto.FollowDTO
 
@@ -61,6 +72,14 @@ func (h *followHandler) CreateFollow(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Summary Получить список всех фолловов
+// @Description Получить все фолловы
+// @Tags follows
+// @Produce json
+// @Success 200 {array} models.Follow
+// @Failure 404 {string} string "Follows notfound"
+// @Failure 500 {string} string "Failed to get follows"
+// @Router /follows [get]
 func (h *followHandler) GetAllFollows(w http.ResponseWriter, r *http.Request) {
 	follows, err := h.FollowService.GetAllFollows()
 	if err != nil {
@@ -76,6 +95,16 @@ func (h *followHandler) GetAllFollows(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(follows)
 }
 
+// @Summary Получить всех фолловеров пользователя
+// @Description Получает всех фолловеров пользователя
+// @Tags follows
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {array} models.Follow
+// @Failure 400 {string} string "Invalid JSON"
+// @Failure 404 {string} string "Followers not found"
+// @Failure 500 {string} string "Failed to get followers"
+// @Router /followers/{id} [get]
 func (h *followHandler) GetAllUserFollowers(w http.ResponseWriter, r *http.Request) {
 	followedID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -98,6 +127,16 @@ func (h *followHandler) GetAllUserFollowers(w http.ResponseWriter, r *http.Reque
 	json.NewEncoder(w).Encode(follows)
 }
 
+// @Summary Получить все фолловы пользователя
+// @Description Получает все фолловы пользователя
+// @Tags follows
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {array} models.Follow
+// @Failure 400 {string} string "Invalid JSON"
+// @Failure 404 {string} string "Follows not found"
+// @Failure 500 {string} string "Failed to get follows"
+// @Router /follow/{id} [get]
 func (h *followHandler) GetAllUserFollows(w http.ResponseWriter, r *http.Request) {
 	followerID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -120,6 +159,17 @@ func (h *followHandler) GetAllUserFollows(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(follows)
 }
 
+// @Summary Удалить фоллов
+// @Description Удаляет фоллов
+// @Tags follows
+// @Accept json
+// @Produce json
+// @Param followInfo body dto.FollowDTO true "Фоллов"
+// @Success 204
+// @Failure 400 {string} string "Invalid JSON"
+// @Failure 400 {string} string "Validate error"
+// @Failure 500 {string} string "Failed to delete follow"
+// @Router /follows [delete]
 func (h *followHandler) DeleteFollow(w http.ResponseWriter, r *http.Request) {
 	var dto dto.FollowDTO
 

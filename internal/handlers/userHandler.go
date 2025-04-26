@@ -65,6 +65,9 @@ func (uh *userHandler) Register(router *chi.Mux) {
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 200 {object} models.User
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 404 {string} string "User Not Found"
+// @Failure 500 {string} string "Failed to find user"
 // @Router /user/{id} [get]
 func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithMethod(uh.Log, "FindUserByID")
@@ -97,7 +100,8 @@ func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 // @Description Получает информацию о всех пользователях
 // @Tags users
 // @Produce json
-// @Success 200 {object} models.User
+// @Success 200 {array} models.User
+// @Failure 500 {string} string "Failed to get users"
 // @Router /users [get]
 func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithMethod(uh.Log, "FindAllUsers")

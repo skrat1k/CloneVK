@@ -50,6 +50,8 @@ func (h *postHandler) Register(router *chi.Mux) {
 // @Produce json
 // @Param postInfo body dto.CreatePostDTO true "Пост"
 // @Success 200
+// @Failure 400 {string} string "Invalid JSON"
+// @Failure 500 {string} string "Failed to create posts"
 // @Router /posts [post]
 func (h *postHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	var dto dto.CreatePostDTO
@@ -88,6 +90,9 @@ func (h *postHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path int true "Post ID"
 // @Success 200 {object} models.Post
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 404 {string} string "Post not found"
+// @Failure 500 {string} string "Failed to find posts"
 // @Router /posts/{id} [get]
 func (h *postHandler) FindPostByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -114,7 +119,12 @@ func (h *postHandler) FindPostByID(w http.ResponseWriter, r *http.Request) {
 // @Tags posts
 // @Produce json
 // @Param id path int true "User ID"
-// @Success 200 {object} models.Post
+// @Success 200 {array} models.Post
+// @Failure 400 {string} string "Invalid userID value"
+// @Failure 400 {string} string "Invalid limit value"
+// @Failure 400 {string} string "Invalid offset value"
+// @Failure 404 {string} string "Posts not found"
+// @Failure 500 {string} string "Failed to find posts"
 // @Router /posts/user/{id} [get]
 func (h *postHandler) GetAllPostsByUser(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
@@ -150,6 +160,15 @@ func (h *postHandler) GetAllPostsByUser(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(posts)
 }
 
+// @Summary Удаление поста
+// @Description Удаляет пост
+// @Tags posts
+// @Produce json
+// @Param id path int true "Post ID"
+// @Success 204
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 500 {string} string "Failed to delete posts"
+// @Router /posts/{id} [delete]
 func (h *postHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
 	postId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -165,6 +184,15 @@ func (h *postHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// @Summary Обновление поста
+// @Description Обновляет пост
+// @Tags posts
+// @Produce json
+// @Param post body dto.UpdatePostDTO true "Новые данные поста"
+// @Success 204
+// @Failure 400 {string} string "Invalid JSON"
+// @Failure 500 {string} string "Failed to update person"
+// @Router /posts/update [put]
 func (h *postHandler) UpdatePost(w http.ResponseWriter, r *http.Request) {
 	newPost := dto.UpdatePostDTO{}
 	err := json.NewDecoder(r.Body).Decode(&newPost)
