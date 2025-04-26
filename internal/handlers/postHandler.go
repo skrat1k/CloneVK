@@ -76,7 +76,7 @@ func (h *postHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
+	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to encode JSON: %s", err.Error()), http.StatusInternalServerError)
@@ -111,6 +111,8 @@ func (h *postHandler) FindPostByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Failed to find post by id: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(post)
 }
 
@@ -118,14 +120,16 @@ func (h *postHandler) FindPostByID(w http.ResponseWriter, r *http.Request) {
 // @Description Получает информацию о всех постах пользователя по его идентификатору
 // @Tags posts
 // @Produce json
-// @Param id path int true "User ID"
+// @Param userid query int true "userid"
+// @Param limit query int true "limit"
+// @Param offset query int true "offset"
 // @Success 200 {array} models.Post
 // @Failure 400 {string} string "Invalid userID value"
 // @Failure 400 {string} string "Invalid limit value"
 // @Failure 400 {string} string "Invalid offset value"
 // @Failure 404 {string} string "Posts not found"
 // @Failure 500 {string} string "Failed to find posts"
-// @Router /posts/user/{id} [get]
+// @Router /posts/user [get]
 func (h *postHandler) GetAllPostsByUser(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	userid, err := strconv.Atoi(queryParams.Get("userid"))
@@ -157,6 +161,9 @@ func (h *postHandler) GetAllPostsByUser(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Posts not found", http.StatusNotFound)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(posts)
 }
 

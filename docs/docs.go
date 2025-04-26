@@ -142,7 +142,7 @@ const docTemplate = `{
         },
         "/feed/personal": {
             "get": {
-                "description": "Получает глобальную ленту",
+                "description": "Получает персональную ленту",
                 "produces": [
                     "application/json"
                 ],
@@ -362,8 +362,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "201": {
+                        "description": "Created"
                     },
                     "400": {
                         "description": "Validate error",
@@ -504,7 +504,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/user/{id}": {
+        "/posts/user": {
             "get": {
                 "description": "Получает информацию о всех постах пользователя по его идентификатору",
                 "produces": [
@@ -517,9 +517,23 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
+                        "description": "userid",
+                        "name": "userid",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -637,7 +651,36 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/{id}": {
+        "/users": {
+            "get": {
+                "description": "Получает информацию о всех пользователях",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Получить всех пользователей",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.User"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to get users",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
             "get": {
                 "description": "Получает информацию о пользователе",
                 "produces": [
@@ -677,35 +720,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Failed to find user",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/users": {
-            "get": {
-                "description": "Получает информацию о всех пользователях",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Получить всех пользователей",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.User"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to get users",
                         "schema": {
                             "type": "string"
                         }

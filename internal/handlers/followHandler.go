@@ -42,7 +42,7 @@ func (h *followHandler) Register(router *chi.Mux) {
 // @Accept json
 // @Produce json
 // @Param followInfo body dto.FollowDTO true "Фоллов"
-// @Success 204
+// @Success 201
 // @Failure 400 {string} string "Invalid JSON"
 // @Failure 400 {string} string "Validate error"
 // @Failure 500 {string} string "Failed to create follow"
@@ -69,7 +69,7 @@ func (h *followHandler) CreateFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	w.WriteHeader(http.StatusCreated)
 }
 
 // @Summary Получить список всех фолловов
@@ -92,6 +92,8 @@ func (h *followHandler) GetAllFollows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(follows)
 }
 
@@ -106,6 +108,7 @@ func (h *followHandler) GetAllFollows(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Failed to get followers"
 // @Router /followers/{id} [get]
 func (h *followHandler) GetAllUserFollowers(w http.ResponseWriter, r *http.Request) {
+	// ПОФИКСИТЬ
 	followedID, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
@@ -124,6 +127,8 @@ func (h *followHandler) GetAllUserFollowers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(follows)
 }
 
@@ -156,6 +161,8 @@ func (h *followHandler) GetAllUserFollows(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(follows)
 }
 

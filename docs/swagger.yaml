@@ -175,7 +175,7 @@ paths:
       - feed
   /feed/personal:
     get:
-      description: Получает глобальную ленту
+      description: Получает персональную ленту
       parameters:
       - description: id получателя ленты
         in: query
@@ -346,8 +346,8 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "201":
+          description: Created
         "400":
           description: Validate error
           schema:
@@ -468,13 +468,23 @@ paths:
       summary: Обновление поста
       tags:
       - posts
-  /posts/user/{id}:
+  /posts/user:
     get:
       description: Получает информацию о всех постах пользователя по его идентификатору
       parameters:
-      - description: User ID
-        in: path
-        name: id
+      - description: userid
+        in: query
+        name: userid
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: offset
+        in: query
+        name: offset
         required: true
         type: integer
       produces:
@@ -501,7 +511,26 @@ paths:
       summary: Получить все посты от пользователя
       tags:
       - posts
-  /user/{id}:
+  /users:
+    get:
+      description: Получает информацию о всех пользователях
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Failed to get users
+          schema:
+            type: string
+      summary: Получить всех пользователей
+      tags:
+      - users
+  /users/{id}:
     get:
       description: Получает информацию о пользователе
       parameters:
@@ -530,25 +559,6 @@ paths:
           schema:
             type: string
       summary: Получить пользователя по ID
-      tags:
-      - users
-  /users:
-    get:
-      description: Получает информацию о всех пользователях
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.User'
-            type: array
-        "500":
-          description: Failed to get users
-          schema:
-            type: string
-      summary: Получить всех пользователей
       tags:
       - users
 swagger: "2.0"

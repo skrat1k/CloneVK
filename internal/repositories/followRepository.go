@@ -77,7 +77,7 @@ func (r *followRepository) GetAllUserFollows(followerID int) ([]models.Follow, e
 }
 
 func (r *followRepository) GetAllUserFollowers(followedID int) ([]models.Follow, error) {
-	query := "SELECT id, followed_id FROM follows WHERE followed_id = $1"
+	query := "SELECT id, follower_id FROM follows WHERE followed_id = $1"
 	rows, err := r.DB.Query(context.Background(), query, followedID)
 	if err != nil {
 		return nil, err
@@ -86,8 +86,8 @@ func (r *followRepository) GetAllUserFollowers(followedID int) ([]models.Follow,
 	var follows []models.Follow
 
 	for rows.Next() {
-		follow := models.Follow{FollowerID: followedID}
-		err := rows.Scan(&follow.ID, &follow.FollowedID)
+		follow := models.Follow{FollowedID: followedID}
+		err := rows.Scan(&follow.ID, &follow.FollowerID)
 		if err != nil {
 			return nil, err
 		}

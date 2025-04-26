@@ -71,7 +71,7 @@ func (h *feedHandler) GetGlobalFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Получить глобальную ленту
-// @Description Получает глобальную ленту
+// @Description Получает персональную ленту
 // @Tags feed
 // @Produce json
 // @Param userid query int true "id получателя ленты"
