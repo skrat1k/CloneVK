@@ -77,17 +77,23 @@ func (ur *userRepository) FindUserByEmail(email string) (*models.User, error) {
 	return user, nil
 }
 
-func (ur *userRepository) SaveRefreshToken(userID int, token string, expiresAt time.Time) error {
+func (ur *userRepository) SaveRefreshToken(userID int, refreshToken string, expiresAt time.Time) error {
 	query := `
 		INSERT INTO refresh_tokens (user_id, token, expires_at)
 		VALUES ($1, $2, $3)
+		ON CONFLICT (user_id)
+		DO UPDATE SET token = EXCLUDED.token, expires_at = EXCLUDED.expires_at
 	`
-	_, err := ur.DB.Exec(context.Background(), query, userID, token, expiresAt)
+	_, err := ur.DB.Exec(context.Background(), query, userID, refreshToken, expiresAt)
 	return err
 }
 
-func (ur *userRepository) DeleteRefreshTokensByUserID(userID int) error {
-	query := "DELETE FROM refresh_tokens WHERE user_id = $1"
-	_, err := ur.DB.Exec(context.Background(), query, userID)
-	return err
-}
+// func (ur *userRepository) DeleteRefreshTokensByUserID(userID int) error {
+// 	query := `
+// 		UPDATE refresh_tokens
+// 		SET token = '', expires_at = NOW()
+// 		WHERE user_id = $1
+// 	`
+// 	_, err := ur.DB.Exec(context.Background(), query, userID)
+// 	return err
+// }
