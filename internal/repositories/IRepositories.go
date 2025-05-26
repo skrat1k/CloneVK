@@ -24,7 +24,28 @@ type IUserRepositories interface {
 type IPostRepositories interface {
 	FindPostByID(id int) (*models.Post, error)
 
-	GetAllPostsByUser(userId int) ([]models.Post, error)
+	GetAllPostsByUser(userId int, limit int, offset int) ([]models.Post, error)
 
 	CreatePost(post *models.Post) error
+
+	DeletePost(id int) error
+
+	UpdatePost(post *models.Post) error
+}
+
+type IFeedRepositories interface {
+	GetGlobalFeed(limit int, offset int) ([]models.Post, error)
+	GetPersonalFeed(userid int, limit int, offset int) ([]models.Post, error)
+}
+
+type IFollowRepositories interface {
+	CreateFollow(followerID int, followedID int) error
+
+	GetAllFollows() ([]models.Follow, error)
+
+	GetAllUserFollows(followerID int) ([]models.Follow, error)
+
+	GetAllUserFollowers(followedID int) ([]models.Follow, error)
+
+	DeleteFollow(followerID int, followedID int) error
 }

@@ -12,6 +12,16 @@ definitions:
     - content
     - id
     type: object
+  dto.FollowDTO:
+    properties:
+      followedID:
+        type: integer
+      followerID:
+        type: integer
+    required:
+    - followedID
+    - followerID
+    type: object
   dto.LoginDTO:
     properties:
       email:
@@ -27,6 +37,27 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  dto.UpdatePostDTO:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      imageURL:
+        type: string
+    required:
+    - content
+    - id
+    type: object
+  models.Follow:
+    properties:
+      followedID:
+        type: integer
+      followerID:
+        type: integer
+      id:
+        type: integer
     type: object
   models.Post:
     properties:
@@ -104,6 +135,230 @@ paths:
       summary: Регистрация пользователя
       tags:
       - users
+  /feed/global:
+    get:
+      description: Получает глобальную ленту
+      parameters:
+      - description: ограничение количества постов
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: пропуск первых n постов
+        in: query
+        name: offset
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Follow'
+            type: array
+        "400":
+          description: Invalid offset value
+          schema:
+            type: string
+        "404":
+          description: No posts in feed
+          schema:
+            type: string
+        "500":
+          description: Failed to get global feed
+          schema:
+            type: string
+      summary: Получить глобальную ленту
+      tags:
+      - feed
+  /feed/personal:
+    get:
+      description: Получает персональную ленту
+      parameters:
+      - description: id получателя ленты
+        in: query
+        name: userid
+        required: true
+        type: integer
+      - description: ограничение количества постов
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: пропуск первых n постов
+        in: query
+        name: offset
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Follow'
+            type: array
+        "400":
+          description: Invalid offset value
+          schema:
+            type: string
+        "404":
+          description: No posts in feed
+          schema:
+            type: string
+        "500":
+          description: Failed to get personal feed
+          schema:
+            type: string
+      summary: Получить глобальную ленту
+      tags:
+      - feed
+  /follow/{id}:
+    get:
+      description: Получает все фолловы пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Follow'
+            type: array
+        "400":
+          description: Invalid JSON
+          schema:
+            type: string
+        "404":
+          description: Follows not found
+          schema:
+            type: string
+        "500":
+          description: Failed to get follows
+          schema:
+            type: string
+      summary: Получить все фолловы пользователя
+      tags:
+      - follows
+  /followers/{id}:
+    get:
+      description: Получает всех фолловеров пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Follow'
+            type: array
+        "400":
+          description: Invalid JSON
+          schema:
+            type: string
+        "404":
+          description: Followers not found
+          schema:
+            type: string
+        "500":
+          description: Failed to get followers
+          schema:
+            type: string
+      summary: Получить всех фолловеров пользователя
+      tags:
+      - follows
+  /follows:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет фоллов
+      parameters:
+      - description: Фоллов
+        in: body
+        name: followInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FollowDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Validate error
+          schema:
+            type: string
+        "500":
+          description: Failed to delete follow
+          schema:
+            type: string
+      summary: Удалить фоллов
+      tags:
+      - follows
+    get:
+      description: Получить все фолловы
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Follow'
+            type: array
+        "404":
+          description: Follows notfound
+          schema:
+            type: string
+        "500":
+          description: Failed to get follows
+          schema:
+            type: string
+      summary: Получить список всех фолловов
+      tags:
+      - follows
+    post:
+      consumes:
+      - application/json
+      description: Фолловит человека на другого
+      parameters:
+      - description: Фоллов
+        in: body
+        name: followInfo
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FollowDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Validate error
+          schema:
+            type: string
+        "500":
+          description: Failed to create follow
+          schema:
+            type: string
+      summary: Создать фоллов
+      tags:
+      - follows
   /posts:
     post:
       consumes:
@@ -121,10 +376,42 @@ paths:
       responses:
         "200":
           description: OK
+        "400":
+          description: Invalid JSON
+          schema:
+            type: string
+        "500":
+          description: Failed to create posts
+          schema:
+            type: string
       summary: Создание поста
       tags:
       - posts
   /posts/{id}:
+    delete:
+      description: Удаляет пост
+      parameters:
+      - description: Post ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "500":
+          description: Failed to delete posts
+          schema:
+            type: string
+      summary: Удаление поста
+      tags:
+      - posts
     get:
       description: Получает пост по идентификатору
       parameters:
@@ -140,16 +427,64 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.Post'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Post not found
+          schema:
+            type: string
+        "500":
+          description: Failed to find posts
+          schema:
+            type: string
       summary: Получить пост по ID
       tags:
       - posts
-  /posts/user/{id}:
+  /posts/update:
+    put:
+      description: Обновляет пост
+      parameters:
+      - description: Новые данные поста
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePostDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid JSON
+          schema:
+            type: string
+        "500":
+          description: Failed to update person
+          schema:
+            type: string
+      summary: Обновление поста
+      tags:
+      - posts
+  /posts/user:
     get:
       description: Получает информацию о всех постах пользователя по его идентификатору
       parameters:
-      - description: User ID
-        in: path
-        name: id
+      - description: userid
+        in: query
+        name: userid
+        required: true
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: offset
+        in: query
+        name: offset
         required: true
         type: integer
       produces:
@@ -158,11 +493,44 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Post'
+            items:
+              $ref: '#/definitions/models.Post'
+            type: array
+        "400":
+          description: Invalid offset value
+          schema:
+            type: string
+        "404":
+          description: Posts not found
+          schema:
+            type: string
+        "500":
+          description: Failed to find posts
+          schema:
+            type: string
       summary: Получить все посты от пользователя
       tags:
       - posts
-  /user/{id}:
+  /users:
+    get:
+      description: Получает информацию о всех пользователях
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Failed to get users
+          schema:
+            type: string
+      summary: Получить всех пользователей
+      tags:
+      - users
+  /users/{id}:
     get:
       description: Получает информацию о пользователе
       parameters:
@@ -178,20 +546,19 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/models.User'
-      summary: Получить пользователя по ID
-      tags:
-      - users
-  /users:
-    get:
-      description: Получает информацию о всех пользователях
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
+        "400":
+          description: Invalid ID
           schema:
-            $ref: '#/definitions/models.User'
-      summary: Получить всех пользователей
+            type: string
+        "404":
+          description: User Not Found
+          schema:
+            type: string
+        "500":
+          description: Failed to find user
+          schema:
+            type: string
+      summary: Получить пользователя по ID
       tags:
       - users
 swagger: "2.0"

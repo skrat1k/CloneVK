@@ -83,17 +83,25 @@ func main() {
 
 	jwtService := services.NewJWTService(log)
 
-	ur := repositories.NewUserRepositories(conn)
+	userRepo := repositories.NewUserRepositories(conn)
+	userService := services.NewUserService(userRepo, log)
+	userHandler := handlers.NewUserHandler(userService, jwtService, log)
+	userHandler.Register(router)
 
-	us := services.NewUserService(ur, log)
+	postRepo := repositories.NewPostRepository(conn)
+	postService := services.NewPostService(postRepo)
+	postHandler := handlers.NewPostHandler(postService, log)
+	postHandler.Register(router)
 
-	uh := handlers.NewUserHandler(us, jwtService, log)
-	uh.Register(router)
+	feedRepo := repositories.NewFeedRepository(conn)
+	feedService := services.NewFeedService(feedRepo)
+	feedHandler := handlers.NewFeedHandler(feedService)
+	feedHandler.Register(router)
 
-	pr := repositories.NewPostRepository(conn)
-	ps := services.NewPostService(pr)
-	ph := handlers.NewPostHandler(ps, log)
-	ph.Register(router)
+	followRepo := repositories.NewFollowRepository(conn)
+	followService := services.NewFollowService(followRepo)
+	followHandler := handlers.NewFollowHandler(followService)
+	followHandler.Register(router)
 
 	router.Get("/swagger/*", httpSwagger.WrapHandler)
 	log.Info("Swagger init")

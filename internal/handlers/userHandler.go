@@ -51,23 +51,16 @@ func (uh *userHandler) Register(router *chi.Mux) {
 	uh.Log.Info("Successfully created http route", slog.String("route", loginURL))
 }
 
-// func (uh *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-// 	user := models.User{}
-// 	c.ShouldBindJSON(&user)
-// 	err := uh.UserService.CreateUser(&user)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	c.JSON(http.StatusOK, user.ID)
-// }
-
 // @Summary Получить пользователя по ID
 // @Description Получает информацию о пользователе
 // @Tags users
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 200 {object} models.User
-// @Router /user/{id} [get]
+// @Failure 400 {string} string "Invalid ID"
+// @Failure 404 {string} string "User Not Found"
+// @Failure 500 {string} string "Failed to find user"
+// @Router /users/{id} [get]
 func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithMethod(uh.Log, "FindUserByID")
 
@@ -91,6 +84,9 @@ func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Failed to find user by id: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
 
 }
@@ -99,7 +95,8 @@ func (uh *userHandler) FindUserByID(w http.ResponseWriter, r *http.Request) {
 // @Description Получает информацию о всех пользователях
 // @Tags users
 // @Produce json
-// @Success 200 {object} models.User
+// @Success 200 {array} models.User
+// @Failure 500 {string} string "Failed to get users"
 // @Router /users [get]
 func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
 	log := logger.WithMethod(uh.Log, "FindAllUsers")
@@ -110,6 +107,8 @@ func (uh *userHandler) FindAllUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(users)
 }
 
@@ -210,6 +209,9 @@ func (uh *userHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info("User successfully logged in", slog.Int("userID", user.ID), slog.String("email", user.Email))
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
 		"access_token":  tokenPair.AccessToken,
 		"refresh_token": tokenPair.RefreshToken,
